@@ -19,3 +19,12 @@ NORTHEAST
 ```
 BERLINCLOCK
 ```
+The sculpture was created by artist Jim Sanborn, who has provided clues to help solve the puzzle. 
+
+The first three messages were solved using a variety of techniques, including frequency analysis, transposition ciphers, and the Vigenère cipher. 
+
+The fourth message is believed to be encrypted using a different method, possibly involving a masking methodology as well as other techniques.
+
+The sculpture itself can be seen below:
+
+<img src="Kryptos_sculptor.jpg">
