@@ -29,28 +29,25 @@ pub fn astronomical_key_generator() -> String {
     astronomical_data.to_string()
 }
 
-pub fn generate_alphabets(n: usize) -> Vec<String> {
-    let mut alphabets = Vec::new();
+pub fn generate_alphabets(n: usize, length: Option<usize>) -> Vec<String> {
     let base_alphabet = "NGHIJLMNQUVWXZKRYPTOSABCDEFGHIJL";
+    let alphabet_length = length.unwrap_or(base_alphabet.len());
 
-    for i in 0..n {
-        let shifted_alphabet = base_alphabet.chars().cycle().skip(i).take(31).collect::<String>();
-        alphabets.push(shifted_alphabet);
-    }
-
-    alphabets
+    (0..n).map(|i| {
+        base_alphabet.chars()
+            .cycle()
+            .skip(i % base_alphabet.len())  // Ensures cycling continues appropriately
+            .take(alphabet_length)
+            .collect()
+    }).collect()
 }
 
-pub fn generate_keywords(n: usize, length: usize) -> Vec<String> {
-    let mut keywords = Vec::new();
-    let alphabet = "NGHIJLMNQUVWXZKRYPTOSABCDEFGHIJL";
 
-    for _ in 0..n {
-        let keyword = (0..length).map(|_| alphabet.chars().nth(rand::thread_rng().gen_range(0..31)).unwrap()).collect::<String>();
-        keywords.push(keyword);
-    }
-
-    keywords
+pub fn generate_keywords_from_wordlist(wordlist: &[String], n: usize) -> Vec<String> {
+    let mut rng = rand::thread_rng();
+    (0..n).map(|_| {
+        wordlist[rng.gen_range(0..wordlist.len())].clone()
+    }).collect()
 }
 
 pub fn decimate_alphabet(alphabet: &str, keyword: &str) -> String {
@@ -64,4 +61,12 @@ pub fn decimate_alphabet(alphabet: &str, keyword: &str) -> String {
     }
 
     decimated_alphabet
+}
+
+pub fn generate_keywords(n: usize, length: usize) -> Vec<String> {
+    let alphabet = "NGHIJLMNQUVWXZKRYPTOSABCDEFGHIJL";
+
+    (0..n).map(|_| {
+        (0..length).map(|_| alphabet.chars().nth(rand::thread_rng().gen_range(0..31)).unwrap()).collect()
+    }).collect()
 }
