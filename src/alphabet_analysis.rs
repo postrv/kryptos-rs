@@ -9,9 +9,46 @@ pub fn contains_keyword(alphabet: &str, keyword: &str) -> bool {
 pub fn score_substring(substring: &str) -> f64 {
     // Define a set of common English words
     let common_words: HashSet<&str> = vec![
-        "THE", "AND", "THAT", "HAVE", "FOR", "NOT", "WITH", "YOU", "THIS", "BUT", "KRYPTOS", "ABSCICCA", "PALIMPSEST", "AGENTS", "BETWEEN", "CLOCK", "SHADOW", "FORTY", "IT", "IS", "BERLIN", "NORTH", "EAST", "SOUTH", "WEST", "FOLLOW", "LEFT", "HAND", "PATH", "NORTHEAST", "SOUTHEAST", "SOUTHWEST", "NORTHWEST", "RIGHT", "PARASYSTOLE", "LETHEAN", "AN"
-        // Add more common words as needed
-    ].into_iter().collect();
+        "THE",
+        "AND",
+        "THAT",
+        "HAVE",
+        "FOR",
+        "NOT",
+        "WITH",
+        "YOU",
+        "THIS",
+        "BUT",
+        "KRYPTOS",
+        "ABSCICCA",
+        "PALIMPSEST",
+        "AGENTS",
+        "BETWEEN",
+        "CLOCK",
+        "SHADOW",
+        "FORTY",
+        "IT",
+        "IS",
+        "BERLIN",
+        "NORTH",
+        "EAST",
+        "SOUTH",
+        "WEST",
+        "FOLLOW",
+        "LEFT",
+        "HAND",
+        "PATH",
+        "NORTHEAST",
+        "SOUTHEAST",
+        "SOUTHWEST",
+        "NORTHWEST",
+        "RIGHT",
+        "PARASYSTOLE",
+        "LETHEAN",
+        "AN", // Add more common words as needed
+    ]
+    .into_iter()
+    .collect();
 
     let uppercase_substring = substring.to_uppercase();
 

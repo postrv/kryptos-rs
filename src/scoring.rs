@@ -1,8 +1,7 @@
-
 // scoring.rs
 
-use std::collections::{HashMap, HashSet};
 use lazy_static::lazy_static;
+use std::collections::{BTreeSet, HashMap};
 
 lazy_static! {
     static ref LETTER_FREQUENCIES: HashMap<char, f64> = {
@@ -90,8 +89,8 @@ static ref BIGRAM_FREQUENCIES: HashMap<&'static str, f64> = {
         freq_map
     };
 
-    static ref COMMON_WORDS: HashSet<&'static str> = {
-        let mut word_set = HashSet::new();
+    static ref COMMON_WORDS: BTreeSet<&'static str> = {
+    let mut word_set = BTreeSet::new();
         word_set.insert("THE");
         word_set.insert("OF");
         word_set.insert("AND");
@@ -329,7 +328,7 @@ static ref BIGRAM_FREQUENCIES: HashMap<&'static str, f64> = {
         word_set.insert("LEFT");
         word_set.insert("LATE");
         word_set.insert("RUN");
-        word_set.insert("DON'T");
+        word_set.insert("DONT");
         word_set.insert("WHILE");
         word_set.insert("PRESS");
         word_set.insert("CLOSE");
@@ -423,14 +422,185 @@ static ref BIGRAM_FREQUENCIES: HashMap<&'static str, f64> = {
         word_set.insert("ABSCICCA");
         word_set.insert("KRYPTOS");
         word_set.insert("YOU");
+        word_set.insert("LOVE");
+        word_set.insert("KGB");
+        word_set.insert("FREEDOM");
+        word_set.insert("LIBERTY");
+        word_set.insert("JUSTICE");
+        word_set.insert("TRUTH");
+        word_set.insert("HONOR");
+        word_set.insert("COURAGE");
+        word_set.insert("DUTY");
+        word_set.insert("LIES");
+        word_set.insert("DECEIT");
+        word_set.insert("TREASON");
+        word_set.insert("HATE");
+        word_set.insert("WAR");
+        word_set.insert("PEACE");
+        word_set.insert("METER");
+        word_set.insert("METERS");
+        word_set.insert("HIRE");
+        word_set.insert("SAPPHIRE");
+        word_set.insert("RUBY");
+        word_set.insert("JACK");
+        word_set.insert("PRE");
+        word_set.insert("GAME");
+        word_set.insert("DATE");
+        word_set.insert("TIME");
+        word_set.insert("SPACE");
+        word_set.insert("EARTH");
+        word_set.insert("CIA");
+        word_set.insert("FBI");
+        word_set.insert("NSA");
+        word_set.insert("PROTECT");
+        word_set.insert("SERVE");
+        word_set.insert("HIS");
+        word_set.insert("HISTORY");
+        word_set.insert("VICTORY");
+        word_set.insert("DEFEAT");
+        word_set.insert("WIN");
+        word_set.insert("LOSE");
+        word_set.insert("VICTOR");
+        word_set.insert("HARD");
+        word_set.insert("TEST");
+        word_set.insert("PHARAOH");
+        word_set.insert("EGYPT");
+        word_set.insert("JOSEPH");
+        word_set.insert("UFO");
+        word_set.insert("ALIEN");
+        word_set.insert("GOD");
+        word_set.insert("NAKED");
+        word_set.insert("LORD");
+        word_set.insert("LAND");
+        word_set.insert("SEA");
+        word_set.insert("WEAK");
+        word_set.insert("NIL");
+        word_set.insert("REB");
+        word_set.insert("RUSSIA");
+        word_set.insert("RUSSIAN");
+        word_set.insert("USA");
+        word_set.insert("AMERICA");
+        word_set.insert("RUS");
+        word_set.insert("SIA");
+        word_set.insert("KENNEDY");
+        word_set.insert("BUSH");
+        word_set.insert("ALIAS");
+        word_set.insert("DIG");
+        word_set.insert("IRAN");
+        word_set.insert("ADVERSE");
+        word_set.insert("ADVERSARY");
+        word_set.insert("ENEMY");
+        word_set.insert("FRIEND");
+        word_set.insert("RADIO");
+        word_set.insert("DAY");
+        word_set.insert("NIGHT");
+        word_set.insert("ING");
+        word_set.insert("OPEN");
+        word_set.insert("BEEN");
+        word_set.insert("MAN");
+        word_set.insert("NUKE");
+        word_set.insert("NUCLEAR");
+        word_set.insert("BOMB");
+        word_set.insert("EYE");
+        word_set.insert("EYES");
+        word_set.insert("EAR");
+        word_set.insert("EARS");
+        word_set.insert("SENSE");
+        word_set.insert("STEALTH");
+        word_set.insert("STEAL");
+        word_set.insert("SELL");
+        word_set.insert("HYDROGEN");
+        word_set.insert("INTEL");
+        word_set.insert("ALPHA");
+        word_set.insert("BRAVO");
+        word_set.insert("CHARLIE");
+        word_set.insert("DELTA");
+        word_set.insert("ECHO");
+        word_set.insert("FOXTROT");
+        word_set.insert("GOLF");
+        word_set.insert("HOTEL");
+        word_set.insert("INDIA");
+        word_set.insert("JULIET");
+        word_set.insert("KILO");
+        word_set.insert("LIMA");
+        word_set.insert("MIKE");
+        word_set.insert("NOVEMBER");
+        word_set.insert("OSCAR");
+        word_set.insert("PAPA");
+        word_set.insert("QUEBEC");
+        word_set.insert("ROMEO");
+        word_set.insert("SIERRA");
+        word_set.insert("TANGO");
+        word_set.insert("UNIFORM");
+        word_set.insert("VICTOR");
+        word_set.insert("WHISKEY");
+        word_set.insert("XRAY");
+        word_set.insert("YANKEE");
+        word_set.insert("ZULU");
+        word_set.insert("ZERO");
+        word_set.insert("ONE");
+        word_set.insert("TWO");
+        word_set.insert("THREE");
+        word_set.insert("FOUR");
+        word_set.insert("FIVE");
+        word_set.insert("SIX");
+        word_set.insert("SEVEN");
+        word_set.insert("EIGHT");
+        word_set.insert("NINE");
+        word_set.insert("TEN");
+        word_set.insert("ELEVEN");
+        word_set.insert("TWELVE");
+        word_set.insert("ENTROPY");
+        word_set.insert("HIGH");
+        word_set.insert("LOW");
+        word_set.insert("PL");
+
+
         // ... (add more common words)
         word_set
+    };
+
+    static ref TRIGRAM_FREQUENCIES: HashMap<&'static str, f64> = {
+        let mut freq_map = HashMap::new();
+        freq_map.insert("THE", 0.0181);
+        freq_map.insert("AND", 0.0073);
+        freq_map.insert("ING", 0.0072);
+        freq_map.insert("ENT", 0.0042);
+        freq_map.insert("ION", 0.0042);
+        freq_map.insert("HER", 0.0036);
+        freq_map.insert("FOR", 0.0034);
+        freq_map.insert("THA", 0.0033);
+        freq_map.insert("NTH", 0.0033);
+        freq_map.insert("INT", 0.0032);
+        freq_map.insert("ERE", 0.0031);
+        freq_map.insert("TIO", 0.0031);
+        freq_map.insert("TER", 0.0030);
+        freq_map.insert("EST", 0.0028);
+        freq_map.insert("ERS", 0.0028);
+        freq_map.insert("ATI", 0.0026);
+        freq_map.insert("HAT", 0.0026);
+        freq_map.insert("ATE", 0.0025);
+        freq_map.insert("ALL", 0.0025);
+        freq_map.insert("ETH", 0.0025);
+        freq_map.insert("HIS", 0.0025);
+        freq_map.insert("VER", 0.0025);
+        freq_map.insert("HES", 0.0024);
+        freq_map.insert("ITH", 0.0024);
+        freq_map.insert("FOR", 0.0023);
+        freq_map.insert("STH", 0.0023);
+        freq_map.insert("OFT", 0.0022);
+        freq_map.insert("TTH", 0.0022);
+        freq_map.insert("RES", 0.0021);
+        freq_map.insert("ONT", 0.0021);
+        // ... (Add more trigrams and their frequencies)
+        freq_map
     };
 }
 
 pub fn score_text(text: &str) -> f64 {
     let mut letter_score = 0.0;
     let mut bigram_score = 0.0;
+    let mut trigram_score = 0.0;
     let mut word_score = 0.0;
 
     let text_length = text.len() as f64;
@@ -448,6 +618,12 @@ pub fn score_text(text: &str) -> f64 {
         }
     }
 
+    for trigram in text_upper.as_bytes().windows(3) {
+        if let Some(&freq) = TRIGRAM_FREQUENCIES.get(&std::str::from_utf8(trigram).unwrap()) {
+            trigram_score += freq;
+        }
+    }
+
     let words: Vec<&str> = text_upper.split_whitespace().collect();
     let word_count = words.len() as f64;
 
@@ -459,7 +635,12 @@ pub fn score_text(text: &str) -> f64 {
 
     let letter_weight = 0.4;
     let bigram_weight = 0.3;
-    let word_weight = 0.3;
+    let trigram_weight = 0.2;
+    let word_weight = 0.1;
 
-    (letter_score * letter_weight + bigram_score * bigram_weight + word_score * word_weight) / (text_length + word_count)
+    (letter_score * letter_weight
+        + bigram_score * bigram_weight
+        + trigram_score * trigram_weight
+        + word_score * word_weight)
+        / (text_length + word_count)
 }

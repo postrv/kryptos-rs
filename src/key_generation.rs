@@ -1,4 +1,3 @@
-
 // key_generation.rs
 
 use rand::Rng;
@@ -33,29 +32,31 @@ pub fn generate_alphabets(n: usize, length: Option<usize>) -> Vec<String> {
     let base_alphabet = "NGHIJLMNQUVWXZKRYPTOSABCDEFGHIJL";
     let alphabet_length = length.unwrap_or(base_alphabet.len());
 
-    (0..n).map(|i| {
-        base_alphabet.chars()
-            .cycle()
-            .skip(i % base_alphabet.len())  // Ensures cycling continues appropriately
-            .take(alphabet_length)
-            .collect()
-    }).collect()
+    (0..n)
+        .map(|i| {
+            base_alphabet
+                .chars()
+                .cycle()
+                .skip(i % base_alphabet.len()) // Ensures cycling continues appropriately
+                .take(alphabet_length)
+                .collect()
+        })
+        .collect()
 }
-
 
 pub fn generate_keywords_from_wordlist(wordlist: &[String], n: usize) -> Vec<String> {
     let mut rng = rand::thread_rng();
-    (0..n).map(|_| {
-        wordlist[rng.gen_range(0..wordlist.len())].clone()
-    }).collect()
+    (0..n)
+        .map(|_| wordlist[rng.gen_range(0..wordlist.len())].clone())
+        .collect()
 }
 
-pub fn decimate_alphabet(alphabet: &str, keyword: &str) -> String {
+pub fn decimate_alphabet(alphabet: &str, keyword: &str, ciphertext_length: usize) -> String {
     let alphabet_len = alphabet.len();
     let keyword_len = keyword.len();
-    let mut decimated_alphabet = String::with_capacity(alphabet_len);
+    let mut decimated_alphabet = String::with_capacity(ciphertext_length);
 
-    for i in 0..alphabet_len {
+    for i in 0..ciphertext_length {
         let index = (i * keyword_len) % alphabet_len;
         decimated_alphabet.push(alphabet.chars().nth(index).unwrap());
     }
@@ -66,7 +67,16 @@ pub fn decimate_alphabet(alphabet: &str, keyword: &str) -> String {
 pub fn generate_keywords(n: usize, length: usize) -> Vec<String> {
     let alphabet = "NGHIJLMNQUVWXZKRYPTOSABCDEFGHIJL";
 
-    (0..n).map(|_| {
-        (0..length).map(|_| alphabet.chars().nth(rand::thread_rng().gen_range(0..31)).unwrap()).collect()
-    }).collect()
+    (0..n)
+        .map(|_| {
+            (0..length)
+                .map(|_| {
+                    alphabet
+                        .chars()
+                        .nth(rand::thread_rng().gen_range(0..31))
+                        .unwrap()
+                })
+                .collect()
+        })
+        .collect()
 }

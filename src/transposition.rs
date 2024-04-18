@@ -1,5 +1,3 @@
-// transposition.rs
-
 pub fn columnar_transposition(text: &str, key: &str) -> String {
     let key_len = key.len();
     let text_len = text.len();
@@ -12,9 +10,11 @@ pub fn columnar_transposition(text: &str, key: &str) -> String {
     for &(i, _) in &key_indices {
         let mut row = i;
         while row < text_len {
-            result[col] = text.chars().nth(row).unwrap();
+            if let Some(ch) = text.chars().nth(row) {
+                result[col] = ch;
+                col += 1;
+            }
             row += key_len;
-            col += 1;
         }
     }
 
@@ -28,8 +28,10 @@ pub fn route_transposition(text: &str, key: &str) -> String {
 
     let mut index: isize = 0;
     let mut direction: isize = 1;
-    for c in text.chars() {
-        result[index as usize] = c;
+    for (_i, c) in text.char_indices() {
+        if index >= 0 && (index as usize) < text_len {
+            result[index as usize] = c;
+        }
         index += direction * key_len as isize;
 
         if index >= text_len as isize || index < 0 {
