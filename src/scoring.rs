@@ -1,7 +1,7 @@
 // scoring.rs
 
 use lazy_static::lazy_static;
-use std::collections::{BTreeSet, HashMap};
+use std::collections::{BTreeSet, HashMap, HashSet};
 
 lazy_static! {
     static ref LETTER_FREQUENCIES: HashMap<char, f64> = {
@@ -633,14 +633,25 @@ pub fn score_text(text: &str) -> f64 {
         }
     }
 
-    let letter_weight = 0.4;
-    let bigram_weight = 0.3;
-    let trigram_weight = 0.2;
+    let known_fragments = vec!["EAST", "BERLIN", "CLOCK", "NORTHEAST"];
+    let known_chars: HashSet<char> = known_fragments.iter().flat_map(|s| s.chars()).collect();
+    let total_chars = text.len() as f64;
+    let known_char_count = text.chars().filter(|c| known_chars.contains(c)).count() as f64;
+    let known_char_percentage = known_char_count / total_chars;
+
+    let expected_known_char_percentage = 24.0 / 97.0; // Assuming 24 known characters out of 97 total characters
+    let percentage_score = 1.0 - (known_char_percentage - expected_known_char_percentage).abs();
+
+    let letter_weight = 0.3;
+    let bigram_weight = 0.2;
+    let trigram_weight = 0.1;
     let word_weight = 0.1;
+    let percentage_weight = 0.3;
 
     (letter_score * letter_weight
         + bigram_score * bigram_weight
         + trigram_score * trigram_weight
-        + word_score * word_weight)
-        / (text_length + word_count)
+        + word_score * word_weight
+        + percentage_score * percentage_weight)
+        / (text_length + word_count + 1.0)
 }

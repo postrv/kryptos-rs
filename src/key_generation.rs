@@ -44,11 +44,26 @@ pub fn generate_alphabets(n: usize, length: Option<usize>) -> Vec<String> {
         .collect()
 }
 
-pub fn generate_keywords_from_wordlist(wordlist: &[String], n: usize) -> Vec<String> {
-    let mut rng = rand::thread_rng();
-    (0..n)
-        .map(|_| wordlist[rng.gen_range(0..wordlist.len())].clone())
-        .collect()
+// key_generation.rs
+
+use std::fs::File;
+use std::io::{BufRead, BufReader};
+
+pub fn generate_keywords_from_wordlist(wordlist_file: &str, length: usize) -> Vec<String> {
+    let file = File::open(wordlist_file).expect("Unable to open wordlist file");
+    let reader = BufReader::new(file);
+
+    let mut keywords = Vec::new();
+
+    for line in reader.lines() {
+        if let Ok(word) = line {
+            if word.len() == length {
+                keywords.push(word.to_uppercase());
+            }
+        }
+    }
+
+    keywords
 }
 
 pub fn decimate_alphabet(alphabet: &str, keyword: &str, ciphertext_length: usize) -> String {
