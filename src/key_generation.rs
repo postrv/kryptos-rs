@@ -47,21 +47,40 @@ pub fn generate_alphabets(n: usize, length: Option<usize>) -> Vec<String> {
 // key_generation.rs
 
 use std::fs::File;
-use std::io::{BufRead, BufReader};
+use std::io::{BufRead, BufReader, Read, Seek, SeekFrom};
+
 
 pub fn generate_keywords_from_wordlist(wordlist_file: &str, length: usize) -> Vec<String> {
     let file = File::open(wordlist_file).expect("Unable to open wordlist file");
-    let reader = BufReader::new(file);
+    let mut reader = BufReader::new(file);
 
-    let mut keywords = Vec::new();
+    let total_words = reader.by_ref().lines().count();
+    let estimated_keywords = total_words / 10; // Adjust the estimation factor as needed
 
-    for line in reader.lines() {
-        if let Ok(word) = line {
-            if word.len() == length {
-                keywords.push(word.to_uppercase());
-            }
+    println!("Total words in the wordlist: {}", total_words);
+    println!("Estimated number of keywords: {}", estimated_keywords);
+
+    let mut keywords = Vec::with_capacity(estimated_keywords);
+
+    reader.seek(SeekFrom::Start(0)).expect("Failed to seek to the beginning of the file");
+
+    let mut processed_words = 0;
+    let progress_interval = total_words / 100; // Print progress every 1% of total words
+
+    for line in reader.lines().filter_map(|line| line.ok()) {
+        processed_words += 1;
+
+        if line.len() == length {
+            keywords.push(line.to_ascii_uppercase());
+        }
+
+        if processed_words % progress_interval == 0 {
+            let progress = processed_words as f64 / total_words as f64 * 100.0;
+            println!("Keyword generation progress: {:.2}%", progress);
         }
     }
+
+    println!("Keyword generation completed. Generated {} keywords.", keywords.len());
 
     keywords
 }
