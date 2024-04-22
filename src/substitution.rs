@@ -24,18 +24,41 @@ pub fn monoalphabetic_substitution(text: &str, key: &str, alphabet: &str) -> Str
 }
 
 pub fn polyalphabetic_substitution(text: &str, key: &str, alphabet: &str) -> String {
-    let mut key_iter = key.chars().cycle();
+    let key_len = key.len();
+    let alphabet_len = alphabet.len();
+
     text.chars()
-        .map(|c| {
+        .enumerate()
+        .map(|(i, c)| {
             if let Some(pos) = alphabet.find(c) {
-                let shift = alphabet.find(key_iter.next().unwrap_or('A')).unwrap_or(0);
+                let key_char = key.chars().nth(i % key_len).unwrap_or('A');
+                let shift = alphabet.find(key_char).unwrap_or(0);
                 alphabet
                     .chars()
-                    .nth((pos + shift) % alphabet.len())
+                    .nth((pos + shift) % alphabet_len)
                     .unwrap_or(c)
             } else {
                 c
             }
+        })
+        .collect()
+}
+
+pub fn generate_shifted_alphabets(key: &str, alphabet: &str) -> Vec<String> {
+    let key_len = key.len();
+    let alphabet_len = alphabet.len();
+
+    (0..alphabet_len)
+        .map(|shift| {
+            alphabet
+                .chars()
+                .enumerate()
+                .map(|(i, c)| {
+                    let key_char = key.chars().nth((i + shift) % key_len).unwrap_or('A');
+                    let pos = alphabet.find(key_char).unwrap_or(0);
+                    alphabet.chars().nth((i + pos) % alphabet_len).unwrap_or(c)
+                })
+                .collect()
         })
         .collect()
 }

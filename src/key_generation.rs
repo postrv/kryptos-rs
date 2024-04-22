@@ -49,7 +49,6 @@ pub fn generate_alphabets(n: usize, length: Option<usize>) -> Vec<String> {
 use std::fs::File;
 use std::io::{BufRead, BufReader, Read, Seek, SeekFrom};
 
-
 pub fn generate_keywords_from_wordlist(wordlist_file: &str, length: usize) -> Vec<String> {
     let file = File::open(wordlist_file).expect("Unable to open wordlist file");
     let mut reader = BufReader::new(file);
@@ -62,7 +61,9 @@ pub fn generate_keywords_from_wordlist(wordlist_file: &str, length: usize) -> Ve
 
     let mut keywords = Vec::with_capacity(estimated_keywords);
 
-    reader.seek(SeekFrom::Start(0)).expect("Failed to seek to the beginning of the file");
+    reader
+        .seek(SeekFrom::Start(0))
+        .expect("Failed to seek to the beginning of the file");
 
     let mut processed_words = 0;
     let progress_interval = total_words / 100; // Print progress every 1% of total words
@@ -80,7 +81,10 @@ pub fn generate_keywords_from_wordlist(wordlist_file: &str, length: usize) -> Ve
         }
     }
 
-    println!("Keyword generation completed. Generated {} keywords.", keywords.len());
+    println!(
+        "Keyword generation completed. Generated {} keywords.",
+        keywords.len()
+    );
 
     keywords
 }

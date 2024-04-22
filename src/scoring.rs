@@ -95,7 +95,6 @@ static ref BIGRAM_FREQUENCIES: HashMap<&'static str, f64> = {
         word_set.insert("OF");
         word_set.insert("AND");
         word_set.insert("TO");
-        word_set.insert("A");
         word_set.insert("IN");
         word_set.insert("THAT");
         word_set.insert("HE");
@@ -107,7 +106,6 @@ static ref BIGRAM_FREQUENCIES: HashMap<&'static str, f64> = {
         word_set.insert("AS");
         word_set.insert("HIS");
         word_set.insert("THEY");
-        word_set.insert("I");
         word_set.insert("AT");
         word_set.insert("BE");
         word_set.insert("THIS");
@@ -404,10 +402,12 @@ static ref BIGRAM_FREQUENCIES: HashMap<&'static str, f64> = {
         word_set.insert("LEFT");
         word_set.insert("HAND");
         word_set.insert("PATH");
+        word_set.insert("EASTNORTHEAST");
         word_set.insert("NORTHEAST");
         word_set.insert("SOUTHEAST");
         word_set.insert("SOUTHWEST");
         word_set.insert("NORTHWEST");
+        word_set.insert("UNDER");
         word_set.insert("RIGHT");
         word_set.insert("PARASYSTOLE");
         word_set.insert("LETHEAN");
@@ -439,13 +439,9 @@ static ref BIGRAM_FREQUENCIES: HashMap<&'static str, f64> = {
         word_set.insert("PEACE");
         word_set.insert("METER");
         word_set.insert("METERS");
-        word_set.insert("HIRE");
         word_set.insert("SAPPHIRE");
         word_set.insert("RUBY");
         word_set.insert("JACK");
-        word_set.insert("PRE");
-        word_set.insert("GAME");
-        word_set.insert("DATE");
         word_set.insert("TIME");
         word_set.insert("SPACE");
         word_set.insert("EARTH");
@@ -494,7 +490,6 @@ static ref BIGRAM_FREQUENCIES: HashMap<&'static str, f64> = {
         word_set.insert("RADIO");
         word_set.insert("DAY");
         word_set.insert("NIGHT");
-        word_set.insert("ING");
         word_set.insert("OPEN");
         word_set.insert("BEEN");
         word_set.insert("MAN");
@@ -553,10 +548,78 @@ static ref BIGRAM_FREQUENCIES: HashMap<&'static str, f64> = {
         word_set.insert("ENTROPY");
         word_set.insert("HIGH");
         word_set.insert("LOW");
-        word_set.insert("PL");
-
-
-        // ... (add more common words)
+        word_set.insert("TIME");
+        word_set.insert("SPACE");
+        word_set.insert("SIGNAL");
+        word_set.insert("NOISE");
+        word_set.insert("SOCIETY");
+        word_set.insert("SOCIETIES");
+        word_set.insert("SECRET");
+        word_set.insert("SECRETS");
+        word_set.insert("HIDDEN");
+        word_set.insert("LIGHT");
+        word_set.insert("DELVE");
+        word_set.insert("DARK");
+        word_set.insert("HUMAN");
+        word_set.insert("BROTHER");
+        word_set.insert("DIG");
+        word_set.insert("STEEL");
+        word_set.insert("WHEN");
+        word_set.insert("MENGENLEHREUHR");
+        word_set.insert("SETTHEORY");
+        word_set.insert("VENN");
+        word_set.insert("DIAGRAM");
+        word_set.insert("UNION");
+        word_set.insert("INTERSECTION");
+        word_set.insert("COMPLEMENT");
+        word_set.insert("SUBSET");
+        word_set.insert("SUPERSET");
+        word_set.insert("SYMMETRIC");
+        word_set.insert("DIFFERENCE");
+        word_set.insert("ELEMENT");
+        word_set.insert("BELONGSTO");
+        word_set.insert("POWERSET");
+        word_set.insert("CARDINALITY");
+        word_set.insert("EMPTYSET");
+        word_set.insert("UNIVERSALSET");
+        word_set.insert("DISJOINT");
+        word_set.insert("MUTUALLYEXCLUSIVE");
+        word_set.insert("COLLECTIVELY");
+        word_set.insert("EXHAUSTIVE");
+        word_set.insert("WATER");
+        word_set.insert("FLOW");
+        word_set.insert("LIQUID");
+        word_set.insert("FLUID");
+        word_set.insert("STREAM");
+        word_set.insert("RIVER");
+        word_set.insert("OCEAN");
+        word_set.insert("TIDE");
+        word_set.insert("WAVE");
+        word_set.insert("CURRENT");
+        word_set.insert("VORTEX");
+        word_set.insert("WHIRLPOOL");
+        word_set.insert("EDDY");
+        word_set.insert("RIPPLE");
+        word_set.insert("CASCADE");
+        word_set.insert("FOUNTAIN");
+        word_set.insert("SPRING");
+        word_set.insert("WELL");
+        word_set.insert("AQUIFER");
+        word_set.insert("RESERVOIR");
+        word_set.insert("CANAL");
+        word_set.insert("AQUEDUCT");
+        word_set.insert("PIPELINE");
+        word_set.insert("SIPHON");
+        word_set.insert("PUMP");
+        word_set.insert("HYDRO");
+        word_set.insert("HYDROLOGY");
+        word_set.insert("HYDRODYNAMICS");
+        word_set.insert("HYDRAULIC");
+        word_set.insert("CORIOLIS");
+        word_set.insert("EQUATOR");
+        word_set.insert("POLE");
+        word_set.insert("SIDES");
+        word_set.insert("NORTH");
         word_set
     };
 
@@ -586,7 +649,6 @@ static ref BIGRAM_FREQUENCIES: HashMap<&'static str, f64> = {
         freq_map.insert("VER", 0.0025);
         freq_map.insert("HES", 0.0024);
         freq_map.insert("ITH", 0.0024);
-        freq_map.insert("FOR", 0.0023);
         freq_map.insert("STH", 0.0023);
         freq_map.insert("OFT", 0.0022);
         freq_map.insert("TTH", 0.0022);
@@ -624,8 +686,8 @@ pub fn score_text(text: &str) -> f64 {
         }
     }
 
-    let words: Vec<&str> = text_upper.split_whitespace().collect();
-    let word_count = words.len() as f64;
+    let words: &[&str] = &text_upper.split_whitespace().collect::<Vec<&str>>();
+    let total_words = words.len() as f64;
 
     for word in words {
         if COMMON_WORDS.contains(word) {
@@ -633,25 +695,28 @@ pub fn score_text(text: &str) -> f64 {
         }
     }
 
+    let scaled_word_score = word_score / total_words;
+
     let known_fragments = vec!["EAST", "BERLIN", "CLOCK", "NORTHEAST"];
     let known_chars: HashSet<char> = known_fragments.iter().flat_map(|s| s.chars()).collect();
     let total_chars = text.len() as f64;
     let known_char_count = text.chars().filter(|c| known_chars.contains(c)).count() as f64;
     let known_char_percentage = known_char_count / total_chars;
 
-    let expected_known_char_percentage = 24.0 / 97.0; // Assuming 24 known characters out of 97 total characters
+    let expected_known_char_percentage = 24.0 / 97.0;
     let percentage_score = 1.0 - (known_char_percentage - expected_known_char_percentage).abs();
 
-    let letter_weight = 0.3;
+    let letter_weight = 0.2;
     let bigram_weight = 0.2;
     let trigram_weight = 0.1;
-    let word_weight = 0.1;
-    let percentage_weight = 0.3;
+    let word_weight = 0.3;
+    let percentage_weight = 0.2;
 
-    (letter_score * letter_weight
+    let raw_score = letter_score * letter_weight
         + bigram_score * bigram_weight
         + trigram_score * trigram_weight
-        + word_score * word_weight
-        + percentage_score * percentage_weight)
-        / (text_length + word_count + 1.0)
+        + scaled_word_score * word_weight
+        + percentage_score * percentage_weight;
+
+    raw_score
 }

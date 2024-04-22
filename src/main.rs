@@ -17,8 +17,6 @@ fn main() {
     // Read the K4 ciphertext from a file
     let ciphertext = fs::read_to_string("k4_ciphertext.txt").expect("Unable to read file");
 
-    let top_n = 200; // Track top 10 results
-
     let substitution_techniques = vec![
         substitution::monoalphabetic_substitution,
         substitution::polyalphabetic_substitution,
@@ -28,41 +26,12 @@ fn main() {
     // Define the 15th alphabet and its reverse
     let alphabet_15 = "KRYPTOSABCDEFGHIJLNGHIJLMNQUVWXZ";
     let alphabet_15_reverse = "ZXWVUQNMLJIHGNLJIHGFEDCBASOTPYRK";
+    let new_candidate_alphabet = "RKLMLEHAGTDHARDPNEOHMGFMFEUHE";
 
-    let base_alphabets = vec![alphabet_15.to_string(), alphabet_15_reverse.to_string()];
-
-    let prioritized_keywords = vec![
-        "BERLIN",
-        "CLOCK",
-        "EAST",
-        "NORTHEAST",
-        "SOUTHEAST",
-        "WEST",
-        "NORTHWEST",
-        "SOUTHWEST",
-        "FOLLOW",
-        "LEFT",
-        "HAND",
-        "PATH",
-        "RIGHT",
-        "PARASYSTOLE",
-        "LETHEAN",
-        "NYPVTT",
-        "ABSCICCA",
-        "PALIMPSEST",
-        "AGENTS",
-        "BETWEEN",
-        "SHADOW",
-        "FORTY",
-        "KRYPTOS",
-        "NORTH",
-        "SOUTH",
-        "CLOCK",
-        "HANDS",
-        "KENNEDY",
-        "BUSH",
-        "ENTROPY"
-        // Add more prioritized keywords
+    let base_alphabets = vec![
+        alphabet_15.to_string(),
+        alphabet_15_reverse.to_string(),
+        new_candidate_alphabet.to_string(),
     ];
 
     // Generate substitution keys from the wordlist
@@ -70,27 +39,35 @@ fn main() {
     let keyword_length = 6;
     let substitution_keys = generate_keywords_from_wordlist(wordlist_file, keyword_length);
 
-    let mut unique_alphabets: Vec<String> = Vec::with_capacity(base_alphabets.len() * substitution_techniques.len() * substitution_keys.len());
+    let mut mono_alphabets: Vec<String> = Vec::new();
+    let mut poly_alphabets: Vec<String> = Vec::new();
 
     for base_alphabet in &base_alphabets {
         for &substitution_fn in &substitution_techniques {
-            for substitution_key in &substitution_keys {
-                let substituted_alphabet =
-                    substitution_fn(base_alphabet, substitution_key, base_alphabet);
-                unique_alphabets.push(substituted_alphabet);
+            if substitution_fn == substitution::monoalphabetic_substitution {
+                for substitution_key in &substitution_keys {
+                    let substituted_alphabet =
+                        substitution_fn(base_alphabet, substitution_key, base_alphabet);
+                    mono_alphabets.push(substituted_alphabet);
+                }
+            } else if substitution_fn == substitution::polyalphabetic_substitution {
+                for substitution_key in &substitution_keys {
+                    let substituted_alphabet =
+                        substitution_fn(base_alphabet, substitution_key, base_alphabet);
+                    poly_alphabets.push(substituted_alphabet);
+                }
             }
         }
     }
 
-    let total_iterations =
-        unique_alphabets.len() * substitution_keys.len() * substitution_techniques.len();
+    let total_iterations = mono_alphabets.len() * substitution_keys.len()
+        + poly_alphabets.len() * substitution_keys.len();
     let progress_interval = if total_iterations > 0 {
         total_iterations / 100
     } else {
         1
     }; // Print progress every 1% of total iterations
 
-    let _iteration_count = 0;
     let progress_lock = Arc::new(Mutex::new(0));
 
     let pool = rayon::ThreadPoolBuilder::new()
@@ -99,34 +76,41 @@ fn main() {
         .unwrap();
 
     // Shared structure to collect results from all threads
-    let top_candidates_global = Arc::new(Mutex::new(BinaryHeap::new()));
+    let top_mono_candidates = Arc::new(Mutex::new(BinaryHeap::new()));
+    let top_poly_candidates = Arc::new(Mutex::new(BinaryHeap::new()));
 
     pool.install(|| {
-        unique_alphabets.par_iter().map(|s| s.as_str()).enumerate().for_each(|(k, alphabet)| {
-            let local_heap = Mutex::new(BinaryHeap::new());
+        mono_alphabets
+            .par_iter()
+            .map(|s| s.as_str())
+            .enumerate()
+            .for_each(|(k, alphabet)| {
+                let local_mono_heap = Mutex::new(BinaryHeap::new());
 
-            substitution_keys.par_iter().for_each(|substitution_key| {
-                substitution_techniques.par_iter().enumerate().for_each(|(j, &substitution_fn)| {
-                    let plaintext = substitution_fn(&ciphertext, substitution_key, alphabet);
+                substitution_keys.par_iter().for_each(|substitution_key| {
+                    let plaintext = substitution::monoalphabetic_substitution(
+                        &ciphertext,
+                        substitution_key,
+                        alphabet,
+                    );
                     let score = scoring::score_text(&plaintext);
                     let candidate = Candidate::new(
                         score,
                         plaintext,
                         0,
-                        j,
+                        0,
                         k,
                         substitution_key.to_string(),
                         alphabet.to_string(),
                     );
 
-                    let mut heap = local_heap.lock().unwrap_or_else(|poisoned| {
-                        poisoned.into_inner()
-                    });
+                    let mut heap = local_mono_heap
+                        .lock()
+                        .unwrap_or_else(|poisoned| poisoned.into_inner());
                     heap.push(Reverse(candidate));
-                    if heap.len() > top_n {
+                    if heap.len() > 250 {
                         heap.pop();
                     }
-
                     // Update progress
                     let mut progress = progress_lock.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
                     *progress += 1;
@@ -137,23 +121,84 @@ fn main() {
                         println!("Progress: {}%, Best Score: {:.8}, Keyword: {}, Plaintext: '{}'", *progress * 100 / total_iterations, current_best.0.score, current_best.0.keyword, current_best.0.plaintext);
                     }
                 });
+
+                let local_mono_heap = local_mono_heap.into_inner().unwrap();
+                let mut global_mono_heap = top_mono_candidates.lock().unwrap();
+                for candidate in local_mono_heap {
+                    global_mono_heap.push(candidate);
+                    if global_mono_heap.len() > 250 {
+                        global_mono_heap.pop();
+                    }
+                }
             });
 
-            let local_heap = local_heap.into_inner().unwrap();
-            let mut global_heap = top_candidates_global.lock().unwrap();
-            for candidate in local_heap {
-                global_heap.push(candidate);
-                if global_heap.len() > top_n {
-                    global_heap.pop();
-                }
-            }
-        });
-    });
+        poly_alphabets
+            .par_iter()
+            .map(|s| s.as_str())
+            .enumerate()
+            .for_each(|(k, alphabet)| {
+                let local_poly_heap = Mutex::new(BinaryHeap::new());
 
-    // Print results from global heap
-    let top_candidates = top_candidates_global.lock().unwrap();
-    println!("\nTop Candidates Summary:");
-    for Reverse(candidate) in top_candidates.iter() {
+                substitution_keys.par_iter().for_each(|substitution_key| {
+                    let plaintext = substitution::polyalphabetic_substitution(
+                        &ciphertext,
+                        substitution_key,
+                        alphabet,
+                    );
+                    let score = scoring::score_text(&plaintext);
+                    let candidate = Candidate::new(
+                        score,
+                        plaintext,
+                        0,
+                        1,
+                        k,
+                        substitution_key.to_string(),
+                        alphabet.to_string(),
+                    );
+
+                    let mut heap = local_poly_heap
+                        .lock()
+                        .unwrap_or_else(|poisoned| poisoned.into_inner());
+                    heap.push(Reverse(candidate));
+                    if heap.len() > 250 {
+                        heap.pop();
+                    }
+                    // Update progress
+                    let mut progress = progress_lock.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+                    *progress += 1;
+                    if *progress % progress_interval == 0 {
+                        let default_candidate = Candidate::new(0.0, String::new(), 0, 0, 0, String::new(), String::new());
+                        let default_reverse = Reverse(default_candidate);
+                        let current_best = heap.peek().unwrap_or(&default_reverse);
+                        println!("Progress: {}%, Best Score: {:.8}, Keyword: {}, Plaintext: '{}'", *progress * 100 / total_iterations, current_best.0.score, current_best.0.keyword, current_best.0.plaintext);
+                    }
+                });
+
+                let local_poly_heap = local_poly_heap.into_inner().unwrap();
+                let mut global_poly_heap = top_poly_candidates.lock().unwrap();
+                for candidate in local_poly_heap {
+                    global_poly_heap.push(candidate);
+                    if global_poly_heap.len() > 250 {
+                        global_poly_heap.pop();
+                    }
+                }
+            });
+    });
+    println!("\nTop Monoalphabetic Candidates:");
+    let top_mono_candidates = top_mono_candidates.lock().unwrap();
+    for Reverse(candidate) in top_mono_candidates.iter() {
+        println!(
+            "Score: {:.8}, Substitution: {}, Alphabet: {}, Keyword: {}, Plaintext: '{}'",
+            candidate.score,
+            candidate.substitution,
+            candidate.alphabet,
+            candidate.keyword,
+            candidate.plaintext
+        );
+    }
+    println!("\nTop Polyalphabetic Candidates:");
+    let top_poly_candidates = top_poly_candidates.lock().unwrap();
+    for Reverse(candidate) in top_poly_candidates.iter() {
         println!(
             "Score: {:.8}, Substitution: {}, Alphabet: {}, Keyword: {}, Plaintext: '{}'",
             candidate.score,
