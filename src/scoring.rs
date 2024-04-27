@@ -706,11 +706,11 @@ pub fn score_text(text: &str) -> f64 {
     let expected_known_char_percentage = 24.0 / 97.0;
     let percentage_score = 1.0 - (known_char_percentage - expected_known_char_percentage).abs();
 
-    let letter_weight = 0.2;
-    let bigram_weight = 0.2;
-    let trigram_weight = 0.1;
-    let word_weight = 0.3;
-    let percentage_weight = 0.2;
+    let letter_weight = 0.5;
+    let bigram_weight = 0.3;
+    let trigram_weight = 0.2;
+    let word_weight = 0.4;
+    let percentage_weight = 0.9;
 
     let raw_score = letter_score * letter_weight
         + bigram_score * bigram_weight

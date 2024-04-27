@@ -18,50 +18,35 @@ fn main() {
     let ciphertext = fs::read_to_string("k4_ciphertext.txt").expect("Unable to read file");
 
     let substitution_techniques = vec![
-        substitution::monoalphabetic_substitution,
         substitution::polyalphabetic_substitution,
         // Add more substitution techniques here
     ];
 
     // Define the 15th alphabet and its reverse
     let alphabet_15 = "KRYPTOSABCDEFGHIJLNGHIJLMNQUVWXZ";
-    let alphabet_15_reverse = "ZXWVUQNMLJIHGNLJIHGFEDCBASOTPYRK";
-    let new_candidate_alphabet = "RKLMLEHAGTDHARDPNEOHMGFMFEUHE";
 
     let base_alphabets = vec![
         alphabet_15.to_string(),
-        alphabet_15_reverse.to_string(),
-        new_candidate_alphabet.to_string(),
     ];
 
     // Generate substitution keys from the wordlist
     let wordlist_file = "/usr/share/dict/words";
-    let keyword_length = 6;
+    let keyword_length = 11;
     let substitution_keys = generate_keywords_from_wordlist(wordlist_file, keyword_length);
 
-    let mut mono_alphabets: Vec<String> = Vec::new();
     let mut poly_alphabets: Vec<String> = Vec::new();
 
     for base_alphabet in &base_alphabets {
         for &substitution_fn in &substitution_techniques {
-            if substitution_fn == substitution::monoalphabetic_substitution {
-                for substitution_key in &substitution_keys {
-                    let substituted_alphabet =
-                        substitution_fn(base_alphabet, substitution_key, base_alphabet);
-                    mono_alphabets.push(substituted_alphabet);
-                }
-            } else if substitution_fn == substitution::polyalphabetic_substitution {
-                for substitution_key in &substitution_keys {
-                    let substituted_alphabet =
-                        substitution_fn(base_alphabet, substitution_key, base_alphabet);
-                    poly_alphabets.push(substituted_alphabet);
-                }
+            for substitution_key in &substitution_keys {
+                let substituted_alphabet =
+                    substitution_fn(base_alphabet, substitution_key, base_alphabet);
+                poly_alphabets.push(substituted_alphabet);
             }
         }
     }
 
-    let total_iterations = mono_alphabets.len() * substitution_keys.len()
-        + poly_alphabets.len() * substitution_keys.len();
+    let total_iterations = poly_alphabets.len() * substitution_keys.len();
     let progress_interval = if total_iterations > 0 {
         total_iterations / 100
     } else {
@@ -76,61 +61,9 @@ fn main() {
         .unwrap();
 
     // Shared structure to collect results from all threads
-    let top_mono_candidates = Arc::new(Mutex::new(BinaryHeap::new()));
     let top_poly_candidates = Arc::new(Mutex::new(BinaryHeap::new()));
 
     pool.install(|| {
-        mono_alphabets
-            .par_iter()
-            .map(|s| s.as_str())
-            .enumerate()
-            .for_each(|(k, alphabet)| {
-                let local_mono_heap = Mutex::new(BinaryHeap::new());
-
-                substitution_keys.par_iter().for_each(|substitution_key| {
-                    let plaintext = substitution::monoalphabetic_substitution(
-                        &ciphertext,
-                        substitution_key,
-                        alphabet,
-                    );
-                    let score = scoring::score_text(&plaintext);
-                    let candidate = Candidate::new(
-                        score,
-                        plaintext,
-                        0,
-                        0,
-                        k,
-                        substitution_key.to_string(),
-                        alphabet.to_string(),
-                    );
-
-                    let mut heap = local_mono_heap
-                        .lock()
-                        .unwrap_or_else(|poisoned| poisoned.into_inner());
-                    heap.push(Reverse(candidate));
-                    if heap.len() > 250 {
-                        heap.pop();
-                    }
-                    // Update progress
-                    let mut progress = progress_lock.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
-                    *progress += 1;
-                    if *progress % progress_interval == 0 {
-                        let default_candidate = Candidate::new(0.0, String::new(), 0, 0, 0, String::new(), String::new());
-                        let default_reverse = Reverse(default_candidate);
-                        let current_best = heap.peek().unwrap_or(&default_reverse);
-                        println!("Progress: {}%, Best Score: {:.8}, Keyword: {}, Plaintext: '{}'", *progress * 100 / total_iterations, current_best.0.score, current_best.0.keyword, current_best.0.plaintext);
-                    }
-                });
-
-                let local_mono_heap = local_mono_heap.into_inner().unwrap();
-                let mut global_mono_heap = top_mono_candidates.lock().unwrap();
-                for candidate in local_mono_heap {
-                    global_mono_heap.push(candidate);
-                    if global_mono_heap.len() > 250 {
-                        global_mono_heap.pop();
-                    }
-                }
-            });
 
         poly_alphabets
             .par_iter()
@@ -184,18 +117,6 @@ fn main() {
                 }
             });
     });
-    println!("\nTop Monoalphabetic Candidates:");
-    let top_mono_candidates = top_mono_candidates.lock().unwrap();
-    for Reverse(candidate) in top_mono_candidates.iter() {
-        println!(
-            "Score: {:.8}, Substitution: {}, Alphabet: {}, Keyword: {}, Plaintext: '{}'",
-            candidate.score,
-            candidate.substitution,
-            candidate.alphabet,
-            candidate.keyword,
-            candidate.plaintext
-        );
-    }
     println!("\nTop Polyalphabetic Candidates:");
     let top_poly_candidates = top_poly_candidates.lock().unwrap();
     for Reverse(candidate) in top_poly_candidates.iter() {
